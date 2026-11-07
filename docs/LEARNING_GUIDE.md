@@ -34,7 +34,7 @@ The original admin reference was inspected before coding: App routing, pages, ca
 
 **Same:** React Hook Form owns form values/errors; mutation hooks call `apiAuth`; Query supplies user state; logout clears cached data.
 
-**Changed and why:** a valid customer session does not imply staff access. `useStaffAccess(userId)` checks current membership through a narrow RPC, rechecking on focus and every minute. Missing migration/errors deny access. The application has no signup or role-grant form. `apiAuth.updateCurrentUser` reauthenticates the current password before a password change, and updates the authoritative guest display name as well as display metadata for profile changes.
+**Changed and why:** a valid customer session does not imply staff access. `useStaffAccess(userId)` checks current membership through a narrow RPC, rechecking on focus and every minute. Missing migration/errors deny access. The application has no signup or role-grant form. `apiAuth.updateCurrentUser` reauthenticates the current password before a password change, and updates only Auth display metadata for staff profile changes. Guest profile edits remain in the customer application.
 
 **Tailwind:** form fields, errors, two-column account cards and the forest-green login panel are JSX utilities. Input/FormRow keep repeated field styling readable.
 

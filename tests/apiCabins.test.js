@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { editCabin, uploadCabinImage } from '../src/services/apiCabins';
+import { editCabin, uploadCabinImage, isSupportedCabinImageUrl } from '../src/services/apiCabins';
 const mocks = vi.hoisted(() => ({
   upload: vi.fn(),
   getPublicUrl: vi.fn(),
@@ -28,9 +28,16 @@ describe('Cabin image safety', () => {
   });
   it('uploads a unique immutable path rather than overwriting another cabin image', async () => {
     mocks.upload.mockResolvedValue({ error: null });
-    mocks.getPublicUrl.mockReturnValue({ data: { publicUrl: 'https://example.invalid/new.png' } });
+    mocks.getPublicUrl.mockReturnValue({
+      data: {
+        publicUrl:
+          'https://flvzioghreivoxdyekya.supabase.co/storage/v1/object/public/cabin-images/new.png',
+      },
+    });
     const file = { type: 'image/png', size: 100 };
-    await expect(uploadCabinImage(file)).resolves.toBe('https://example.invalid/new.png');
+    await expect(uploadCabinImage(file)).resolves.toBe(
+      'https://flvzioghreivoxdyekya.supabase.co/storage/v1/object/public/cabin-images/new.png',
+    );
     expect(mocks.upload).toHaveBeenCalledWith(
       expect.stringMatching(/^cabins\/[a-f0-9-]+\.png$/),
       file,
@@ -39,7 +46,12 @@ describe('Cabin image safety', () => {
   });
   it('preserves uploaded files and does not roll back an edited record when save fails', async () => {
     mocks.upload.mockResolvedValue({ error: null });
-    mocks.getPublicUrl.mockReturnValue({ data: { publicUrl: 'https://example.invalid/new.png' } });
+    mocks.getPublicUrl.mockReturnValue({
+      data: {
+        publicUrl:
+          'https://flvzioghreivoxdyekya.supabase.co/storage/v1/object/public/cabin-images/new.png',
+      },
+    });
     const query = {
       update: vi.fn(),
       eq: vi.fn(),
@@ -57,7 +69,7 @@ describe('Cabin image safety', () => {
       max_capacity: 2,
       regular_price: 200,
       discount: 0,
-      image: 'https://example.invalid/old.png',
+      image: 'https://images.unsplash.com/old.png',
       gallery: [],
       amenities: [],
       is_active: true,
@@ -70,4 +82,10 @@ describe('Cabin image safety', () => {
     expect(query.update).toHaveBeenCalledTimes(1);
     expect(mocks.remove).not.toHaveBeenCalled();
   });
+});
+
+it('rejects image hosts blocked by the customer content security policy', () => {
+  expect(isSupportedCabinImageUrl('https://images.unsplash.com/photo-test')).toBe(true);
+  expect(isSupportedCabinImageUrl('http://images.unsplash.com/photo-test')).toBe(false);
+  expect(isSupportedCabinImageUrl('https://arbitrary.example/cabin.png')).toBe(false);
 });

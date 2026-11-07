@@ -1,4 +1,17 @@
 import { requireSupabase } from './supabase';
+import { PROJECT_REF } from '../utils/constants';
+
+export function isSupportedCabinImageUrl(value) {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === 'https:' &&
+      ['images.unsplash.com', `${PROJECT_REF}.supabase.co`].includes(url.hostname)
+    );
+  } catch {
+    return false;
+  }
+}
 
 export async function getCabins() {
   const { data, error } = await requireSupabase()
@@ -45,6 +58,11 @@ async function saveCabin({ values, imageFile, id }) {
   const client = requireSupabase();
   let image = values.image;
   if (imageFile) image = await uploadCabinImage(imageFile);
+  if (!isSupportedCabinImageUrl(image) || !values.gallery.every(isSupportedCabinImageUrl)) {
+    throw new Error(
+      'Use HTTPS images from Unsplash or this project’s Supabase Storage so they display on the customer site.',
+    );
+  }
   const cabin = {
     name: values.name.trim(),
     subtitle: values.subtitle.trim(),

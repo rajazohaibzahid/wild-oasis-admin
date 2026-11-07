@@ -4,12 +4,14 @@ export function formatCurrency(value) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(Number(value));
 }
 
 export function formatDate(value) {
   if (!value) return '—';
+  if (value.includes('T')) return format(parseISO(getToday(new Date(value))), 'MMM d, yyyy');
   return format(parseISO(value), 'MMM d, yyyy');
 }
 

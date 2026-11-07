@@ -15,6 +15,8 @@ export function useAuthSession() {
           queryClient.setQueryData(['user'], null);
         }
         if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+          const previousUser = queryClient.getQueryData(['user']);
+          if (previousUser && previousUser.id !== session?.user?.id) queryClient.clear();
           queryClient.setQueryData(['user'], session?.user || null);
           queryClient.invalidateQueries({ queryKey: ['staff-access'] });
         }

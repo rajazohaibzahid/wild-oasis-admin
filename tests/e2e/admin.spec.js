@@ -15,7 +15,7 @@ const cabin = {
   max_capacity: 2,
   regular_price: 260,
   discount: 30,
-  image: 'https://example.invalid/cabin.jpg',
+  image: 'https://images.unsplash.com/cabin.jpg',
   gallery: [],
   amenities: ['Wi-Fi'],
   is_active: true,
@@ -69,7 +69,7 @@ async function mockBackend(page, { staff = true, missingMigration = false } = {}
     localStorage.setItem('wild-oasis-admin-auth', JSON.stringify(value));
     localStorage.setItem('wild-oasis-admin-theme', 'light');
   }, session);
-  await page.route('https://example.invalid/**', (route) =>
+  await page.route('https://images.unsplash.com/**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'image/svg+xml',
@@ -80,11 +80,14 @@ async function mockBackend(page, { staff = true, missingMigration = false } = {}
     const request = route.request();
     const url = new URL(request.url());
     const path = url.pathname;
-    requests.push({ path, method: request.method(), body: request.postDataJSON() });
+    const isJson = request.headers()['content-type']?.includes('application/json');
+    requests.push({ path, method: request.method(), body: isJson ? request.postDataJSON() : null });
     let body;
     const headers = { 'content-type': 'application/json', 'access-control-allow-origin': '*' };
     if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
-    if (path.includes('/auth/v1/user')) body = user;
+    if (path.includes('/storage/v1/object/cabin-images/'))
+      body = { Key: 'cabin-images/test-upload.png' };
+    else if (path.includes('/auth/v1/user')) body = user;
     else if (path.includes('/auth/v1/logout')) body = {};
     else if (path.endsWith('/rpc/staff_access')) {
       if (missingMigration)
@@ -220,7 +223,7 @@ test('staff cabin add, edit, duplicate and confirmed delete', async ({ page }) =
   await page.getByLabel('Cabin name').fill('Maple Retreat');
   await page.getByLabel('Subtitle', { exact: true }).fill('A quiet woodland stay');
   await page.getByLabel('Description', { exact: true }).fill('A test cabin in the forest.');
-  await page.getByLabel('Cover image URL').fill('https://example.invalid/maple.jpg');
+  await page.getByLabel('Cover image URL').fill('https://images.unsplash.com/maple.jpg');
   await page.getByRole('button', { name: 'Create cabin', exact: true }).click();
   await expect(page.getByText('Cabin created', { exact: true })).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -265,5 +268,31 @@ test('checkin preserves payment and uses validated RPC', async ({ page }) => {
   });
   expect(
     requests.some((request) => request.path.endsWith('/bookings') && request.method === 'PATCH'),
+  ).toBe(false);
+});
+
+test('cabin cover upload is saved as a new public storage URL', async ({ page }) => {
+  const requests = await mockBackend(page);
+  await page.goto('/cabins');
+  await page.getByLabel('Actions for Cedar & Still').click();
+  await page.getByRole('button', { name: 'Edit', exact: true }).click();
+  await page.getByLabel('Or upload a new cover image (up to 10 MB)').setInputFiles({
+    name: 'cover.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('synthetic-test-image'),
+  });
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  await expect(page.getByText('Cabin updated')).toBeVisible();
+  const upload = requests.find(
+    (request) =>
+      request.path.includes('/storage/v1/object/cabin-images/') && request.method === 'POST',
+  );
+  expect(upload).toBeTruthy();
+  const saved = requests.find(
+    (request) => request.path.endsWith('/cabins') && request.method === 'PATCH',
+  );
+  expect(saved.body.image).toContain('/storage/v1/object/public/cabin-images/cabins/');
+  expect(
+    requests.some((request) => request.path.includes('/storage/') && request.method === 'DELETE'),
   ).toBe(false);
 });

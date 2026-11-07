@@ -77,6 +77,10 @@ Read [the database approval packet](docs/DATABASE_REVIEW.md), [staff provisionin
 
 The existing customer website and original dashboard repositories are unchanged. No production database changes, staff grants, or deployment are authorized by simply running the app.
 
+## Final review
+
+[Final audit, tested fixes, remaining limits and interview exercises](docs/FINAL_CODE_REVIEW.md).
+
 ## Learn the implementation
 
 [Learning guide](docs/LEARNING_GUIDE.md) maps each feature to the course project and explains the meaningful differences. [Implementation status](docs/IMPLEMENTATION_STATUS.md) distinguishes local completion from pending hosted work.

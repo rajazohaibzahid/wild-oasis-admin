@@ -1,4 +1,4 @@
-> **Hosted update — November 7, 2026:** The owner explicitly approved the reviewed admin migration in chat. It was applied successfully to `flvzioghreivoxdyekya` as migration `20261107100718_staff_admin_operations` (the reviewed local file is `20261107085611_staff_admin_operations.sql`). The first email-confirmed account was subsequently provisioned as admin with explicit owner approval; its identity is retained only in an ignored local operator record. Earlier pending-approval statements below describe the original implementation handoff.
+> **Hosted update — November 7, 2026:** The owner explicitly approved the reviewed admin migration in chat. It was applied successfully to `flvzioghreivoxdyekya` as migration `20261107100718_staff_admin_operations` (the local filename has been aligned to this hosted version; the initial review used timestamp `20261107085611`). The first email-confirmed account was subsequently provisioned as admin with explicit owner approval; its identity is retained only in an ignored local operator record. Earlier pending-approval statements below describe the original implementation handoff.
 
 # Proposed admin database changes — owner approval required
 
@@ -20,7 +20,7 @@ Tables inspected: `public.cabins`, `public.guests`, `public.bookings`, `public.s
 
 ## Exact migration for review
 
-`supabase/migrations/20261107085611_staff_admin_operations.sql`
+`supabase/migrations/20261107100718_staff_admin_operations.sql`
 
 | Addition                                 | Why required                                                                             | Authorization                                                                         |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |

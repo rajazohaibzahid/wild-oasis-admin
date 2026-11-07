@@ -49,13 +49,8 @@ export async function updateCurrentUser({ fullName, password, currentPassword })
     const { error } = await client.auth.updateUser({ password });
     if (error) throw new Error(error.message);
   } else {
-    const {
-      data: { user },
-    } = await client.auth.getUser();
-    if (!user) throw new Error('Please sign in again.');
-    const { error } = await client.from('guests').update({ full_name: fullName }).eq('id', user.id);
+    // Staff display names belong to Auth metadata; guest profiles are edited in the customer app.
+    const { error } = await client.auth.updateUser({ data: { full_name: fullName.trim() } });
     if (error) throw new Error(error.message);
-    const { error: authError } = await client.auth.updateUser({ data: { full_name: fullName } });
-    if (authError) throw new Error(authError.message);
   }
 }
