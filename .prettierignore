@@ -1,0 +1,6 @@
+node_modules
+dist
+package-lock.json
+supabase/reference-migrations
+playwright-report
+test-results
