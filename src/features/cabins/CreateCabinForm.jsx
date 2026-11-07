@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { useCreateCabin } from './useCreateCabin';
 import { useEditCabin } from './useEditCabin';
+import { isSupportedCabinImageUrl } from '../../services/apiCabins';
 import Input from '../../ui/Input';
 import Textarea from '../../ui/Textarea';
 import FormRow from '../../ui/FormRow';
@@ -128,8 +129,9 @@ function CreateCabinForm({ cabinToEdit, onClose, onBusyChange }) {
             type="url"
             {...register('image', {
               validate: (value) =>
-                Boolean(value || getValues('imageFile')?.length) ||
-                'Choose a cover image URL or upload.',
+                Boolean(getValues('imageFile')?.length) ||
+                isSupportedCabinImageUrl(value) ||
+                'Use an Unsplash or this project’s Storage HTTPS URL, or upload an image.',
             })}
           />
         </FormRow>
@@ -142,8 +144,8 @@ function CreateCabinForm({ cabinToEdit, onClose, onBusyChange }) {
           />
         </FormRow>
         <p className="text-xs leading-5 text-stone-500">
-          Existing image files stay in storage when edited, duplicated, or deleted. Shared
-          references are preserved.
+          Use images.unsplash.com or this project’s Supabase Storage URLs. Existing image files stay
+          in storage when edited, duplicated, or deleted. Shared references are preserved.
         </p>
         <FormRow id="gallery" label="Gallery URLs (one per line)">
           <Textarea
@@ -153,7 +155,8 @@ function CreateCabinForm({ cabinToEdit, onClose, onBusyChange }) {
                 value
                   .split('\n')
                   .filter((url) => url.trim())
-                  .every((url) => /^https:\/\//.test(url.trim())) || 'Gallery URLs must use HTTPS.',
+                  .every((url) => isSupportedCabinImageUrl(url.trim())) ||
+                'Gallery URLs must use supported HTTPS image hosts.',
             })}
           />
           {errors.gallery && (

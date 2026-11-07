@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getPage, getToday } from '../src/utils/helpers';
+import { getPage, getToday, formatCurrency, formatDate } from '../src/utils/helpers';
 import { validateCabin } from '../src/services/apiCabins';
 
 describe('Property calendar and URL pagination', () => {
@@ -22,5 +22,14 @@ describe('Cabin business validation', () => {
   it('rejects fractional capacity and invalid prices', () => {
     expect(() => validateCabin({ ...cabin, max_capacity: 2.5 })).toThrow('Capacity');
     expect(() => validateCabin({ ...cabin, regular_price: NaN })).toThrow('Price');
+  });
+});
+
+// Reservation prices are numeric(12,2); do not round a real amount into a whole dollar.
+describe('Financial and timestamp presentation', () => {
+  it('preserves cents', () => expect(formatCurrency(230.49)).toBe('$230.49'));
+  it('uses the property date for timestamp display and preserves date-only stays', () => {
+    expect(formatDate('2026-11-07T20:01:00Z')).toBe('Nov 8, 2026');
+    expect(formatDate('2026-11-07')).toBe('Nov 7, 2026');
   });
 });

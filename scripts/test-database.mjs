@@ -43,6 +43,10 @@ try {
   for (const item of Array.isArray(result) ? result : [result]) {
     for (const row of item.rows || []) if (row.result) console.log(row.result);
   }
+  const flow = await client.query(await readFile('supabase/tests/cross-app-flow.sql', 'utf8'));
+  for (const item of Array.isArray(flow) ? flow : [flow]) {
+    for (const row of item.rows || []) if (row.result) console.log(row.result);
+  }
   const version = await client.query('show server_version');
   console.log(
     `PASS: all database suites on PostgreSQL ${version.rows[0].server_version}. No hosted writes.`,

@@ -23,7 +23,7 @@ export async function getTodayActivity() {
     .from('bookings')
     .select('id,status,start_date,end_date,num_guests,cabins(name),guests(full_name)')
     .or(
-      `and(status.eq.confirmed,start_date.eq.${today}),and(status.eq.checked_in,end_date.lte.${today})`,
+      `and(status.eq.confirmed,start_date.lte.${today},end_date.gt.${today}),and(status.eq.checked_in,end_date.lte.${today})`,
     )
     .order('start_date')
     .order('id');
